@@ -1,9 +1,9 @@
-import { installedApps } from "@/lib/core/DesktopEngine";
+import { apps } from "@/config/apps";
 
 export function getInstalledApps() {
-  return installedApps;
+  return apps;
 }
 
 export function getApp(id: string) {
-  return installedApps.find(app => app.id === id);
+  return apps.find((app) => app.id === id);
 }

@@ -4,17 +4,32 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 
 import { getInstalledApps } from "@/system/registry/AppRegistry";
+import AppLoader from "@/system/registry/AppLoader";
 
 import Dock from "@/system/dock/Dock";
 import TopBar from "@/system/topbar/TopBar";
 import Window from "@/system/window/Window";
 
-import WalletApp from "@/apps/wallet/WalletApp";
+interface OpenWindow {
+  id: string;
+  title: string;
+}
 
 export default function Desktop() {
   const apps = getInstalledApps();
 
-  const [openedApp, setOpenedApp] = useState<string | null>(null);
+  const [windows, setWindows] = useState<OpenWindow[]>([]);
+
+  function openWindow(id: string, title: string) {
+    setWindows((prev) => {
+      if (prev.find((w) => w.id === id)) return prev;
+      return [...prev, { id, title }];
+    });
+  }
+
+  function closeWindow(id: string) {
+    setWindows((prev) => prev.filter((w) => w.id !== id));
+  }
 
   return (
     <div className="w-screen h-screen bg-[#0b1220] text-white relative overflow-hidden">
@@ -29,20 +44,16 @@ export default function Desktop() {
             key={app.id}
             whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.95 }}
-            onDoubleClick={() => setOpenedApp(app.id)}
+            onDoubleClick={() => openWindow(app.id, app.name)}
             className="flex flex-col items-center cursor-pointer select-none"
           >
 
             <div className="text-6xl mb-3">
-
               {app.icon}
-
             </div>
 
             <span className="text-sm">
-
               {app.name}
-
             </span>
 
           </motion.div>
@@ -51,18 +62,19 @@ export default function Desktop() {
 
       </div>
 
-      {openedApp === "wallet" && (
+      {windows.map((window) => (
 
         <Window
-          title="Arc Wallet"
-          onClose={() => setOpenedApp(null)}
+          key={window.id}
+          title={window.title}
+          onClose={() => closeWindow(window.id)}
         >
 
-          <WalletApp />
+          <AppLoader appId={window.id} />
 
         </Window>
 
-      )}
+      ))}
 
       <Dock />
 
