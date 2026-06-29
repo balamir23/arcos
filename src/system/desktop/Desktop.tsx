@@ -1,35 +1,19 @@
 "use client";
 
-import { useState } from "react";
 import { motion } from "framer-motion";
 
 import { getInstalledApps } from "@/system/registry/AppRegistry";
-import AppLoader from "@/system/registry/AppLoader";
 
-import Dock from "@/system/dock/Dock";
 import TopBar from "@/system/topbar/TopBar";
-import Window from "@/system/window/Window";
+import Dock from "@/system/dock/Dock";
+import WindowManager from "@/system/window/WindowManager";
 
-interface OpenWindow {
-  id: string;
-  title: string;
-}
+import { useWindowStore } from "@/store/windowStore";
 
 export default function Desktop() {
   const apps = getInstalledApps();
 
-  const [windows, setWindows] = useState<OpenWindow[]>([]);
-
-  function openWindow(id: string, title: string) {
-    setWindows((prev) => {
-      if (prev.find((w) => w.id === id)) return prev;
-      return [...prev, { id, title }];
-    });
-  }
-
-  function closeWindow(id: string) {
-    setWindows((prev) => prev.filter((w) => w.id !== id));
-  }
+  const openWindow = useWindowStore((state) => state.openWindow);
 
   return (
     <div className="w-screen h-screen bg-[#0b1220] text-white relative overflow-hidden">
@@ -44,7 +28,20 @@ export default function Desktop() {
             key={app.id}
             whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.95 }}
-            onDoubleClick={() => openWindow(app.id, app.name)}
+            onDoubleClick={() =>
+              openWindow({
+                id: app.id,
+                appId: app.id,
+                title: app.name,
+                x: 100,
+                y: 100,
+                width: 820,
+                height: 520,
+                minimized: false,
+                maximized: false,
+                focused: true,
+              })
+            }
             className="flex flex-col items-center cursor-pointer select-none"
           >
 
@@ -52,7 +49,7 @@ export default function Desktop() {
               {app.icon}
             </div>
 
-            <span className="text-sm">
+            <span className="text-sm text-center">
               {app.name}
             </span>
 
@@ -62,19 +59,7 @@ export default function Desktop() {
 
       </div>
 
-      {windows.map((window) => (
-
-        <Window
-          key={window.id}
-          title={window.title}
-          onClose={() => closeWindow(window.id)}
-        >
-
-          <AppLoader appId={window.id} />
-
-        </Window>
-
-      ))}
+      <WindowManager />
 
       <Dock />
 

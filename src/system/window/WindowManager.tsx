@@ -1,26 +1,12 @@
 "use client";
 
-import { useState } from "react";
 import Window from "./Window";
-
-export interface OpenWindow {
-  id: string;
-  title: string;
-}
+import { useWindowStore } from "@/store/windowStore";
+import AppLoader from "@/system/registry/AppLoader";
 
 export default function WindowManager() {
-  const [windows, setWindows] = useState<OpenWindow[]>([]);
-
-  function openWindow(id: string, title: string) {
-    setWindows((prev) => {
-      if (prev.find((w) => w.id === id)) return prev;
-      return [...prev, { id, title }];
-    });
-  }
-
-  function closeWindow(id: string) {
-    setWindows((prev) => prev.filter((w) => w.id !== id));
-  }
+  const windows = useWindowStore((state) => state.windows);
+  const closeWindow = useWindowStore((state) => state.closeWindow);
 
   return (
     <>
@@ -30,11 +16,7 @@ export default function WindowManager() {
           title={window.title}
           onClose={() => closeWindow(window.id)}
         >
-          <h2 className="text-2xl font-bold">{window.title}</h2>
-
-          <p className="mt-4 text-gray-400">
-            ArcOS Application
-          </p>
+          <AppLoader appId={window.appId} />
         </Window>
       ))}
     </>
