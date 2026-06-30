@@ -37,9 +37,16 @@ export const apps: AppDefinition[] = [
   },
   {
     id: "arc-name-service",
-    name: "Arc Name",
+    name: "Arc Name Service",
     icon: "🌐",
-    description: "Register your Arc identity",
+    description: "Register your .arc identity",
+    version: "1.0.0",
+  },
+  {
+    id: "faucet",
+    name: "Faucet",
+    icon: "💧",
+    description: "Get Test USDC",
     version: "1.0.0",
   },
   {

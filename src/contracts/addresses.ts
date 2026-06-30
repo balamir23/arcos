@@ -1,0 +1,9 @@
+export const CONTRACTS = {
+  TEST_USDC: "0xa62ebe727d8bb32d618f5c1c42dadf74ce1b5d9d",
+
+  TREASURY: "0x63e1f5948e2718d9dd92214c19f187e34c3660fe",
+
+  PRICE_MANAGER: "0xde2b88d6a7ad4133ebc4be39a5e0c5bd003b6d1e",
+
+  ARC_NAME_SERVICE: "0xdb55194ad3536ce184df3aa2248a561cd9ad78c9",
+} as const;

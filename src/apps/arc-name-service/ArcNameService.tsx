@@ -2,6 +2,13 @@
 
 import { useMemo, useState } from "react";
 
+import {
+  useAccount,
+  useReadContract,
+  useWriteContract,
+  useWaitForTransactionReceipt,
+} from "wagmi";
+
 import SearchCard from "./components/SearchCard";
 import RegistrationCard, {
   RegistrationOption,
@@ -12,7 +19,9 @@ import MyNames from "./components/MyNames";
 import ProfileCard from "./components/ProfileCard";
 
 import { myNames } from "./data";
-import { checkName } from "./services";
+
+import { CONTRACTS } from "@/contracts/addresses";
+import { arcNameAbi } from "@/contracts/arcNameAbi";
 
 const periods: RegistrationOption[] = [
   { year: "1 Year", price: 2 },
@@ -23,18 +32,35 @@ const periods: RegistrationOption[] = [
 ];
 
 export default function ArcNameService() {
+  const { address } = useAccount();
+
   const [name, setName] = useState("");
   const [selected, setSelected] = useState(periods[0]);
 
-  const result = useMemo(() => {
-    if (!name.trim()) return null;
+  const years = useMemo(() => {
+    return Number(selected.year.split(" ")[0]);
+  }, [selected]);
 
-    return checkName(name.trim());
-  }, [name]);
+  const { data: available } = useReadContract({
+    abi: arcNameAbi,
+    address: CONTRACTS.ARC_NAME_SERVICE,
+    functionName: "isAvailable",
+    args: [name],
+    query: {
+      enabled: name.length > 2,
+    },
+  });
 
-  const available =
-    name.trim().length > 0 &&
-    result === null;
+  const {
+    writeContract,
+    data: registerHash,
+  } = useWriteContract();
+
+  const {
+    isLoading: isRegistering,
+  } = useWaitForTransactionReceipt({
+    hash: registerHash,
+  });
 
   return (
     <div className="w-full h-full bg-[#101826] text-white p-8 overflow-auto">
@@ -50,7 +76,7 @@ export default function ArcNameService() {
           <SearchCard
             value={name}
             onChange={setName}
-            available={available}
+            available={Boolean(available)}
           />
 
           <RegistrationCard
@@ -60,14 +86,28 @@ export default function ArcNameService() {
           />
 
           <button
-            disabled={!available}
+            disabled={
+              !available ||
+              !address ||
+              isRegistering
+            }
+            onClick={() =>
+              writeContract({
+                abi: arcNameAbi,
+                address: CONTRACTS.ARC_NAME_SERVICE,
+                functionName: "register",
+                args: [name, BigInt(years)],
+              })
+            }
             className={`w-full rounded-lg py-3 font-semibold transition ${
               available
                 ? "bg-cyan-500 hover:bg-cyan-400"
                 : "bg-gray-700 cursor-not-allowed"
             }`}
           >
-            Register Name
+            {isRegistering
+              ? "Registering..."
+              : `Register ${name || "username"}.arc`}
           </button>
 
         </div>
@@ -80,9 +120,9 @@ export default function ArcNameService() {
         <div className="space-y-6">
 
           <StatusCard
-            available={available}
-            owner={result?.owner ?? "-"}
-            expires={result?.expires ?? "-"}
+            available={Boolean(available)}
+            owner="-"
+            expires="-"
             balance="0"
           />
 

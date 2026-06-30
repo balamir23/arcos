@@ -5,6 +5,7 @@ import TokenStudio from "@/apps/token-studio/TokenStudio";
 import NFTStudio from "@/apps/nft-studio/NFTStudio";
 import BridgeApp from "@/apps/bridge/BridgeApp";
 import ArcNameService from "@/apps/arc-name-service/ArcNameService";
+import FaucetApp from "@/apps/faucet/FaucetApp";
 
 interface Props {
   appId: string;
@@ -26,6 +27,9 @@ export default function AppLoader({ appId }: Props) {
 
     case "arc-name-service":
       return <ArcNameService />;
+
+    case "faucet":
+      return <FaucetApp />;
 
     default:
       return (

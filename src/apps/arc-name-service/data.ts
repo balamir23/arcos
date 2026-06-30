@@ -12,7 +12,7 @@ export const reservedNames = [
 
 export const myNames = [
   {
-    name: "0xilhan.arc",
+    name: "satoshi.arc",
     expires: "364 Days Left",
   },
 ];
